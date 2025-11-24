@@ -1,92 +1,47 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { AuthContext } from "../context/AuthContext.jsx";
+import axios from "axios";
 
-const Dashboard = () => {
-  const [user, setUser] = useState(null);
-  const [modules, setModules] = useState([]);
-  const [shops, setShops] = useState([]);
-  const [vendors, setVendors] = useState([]);
-  const [products, setProducts] = useState([]);
+export default function Dashboard() {
+  const { user, token } = useContext(AuthContext);
   const navigate = useNavigate();
+  const [modules, setModules] = useState([]);
 
-  const token = localStorage.getItem("token");
+  const backendUrl = "https://super-backend-bzin.onrender.com";
 
   useEffect(() => {
-    // Check if user is logged in
-    const storedUser = localStorage.getItem("user");
-    if (!storedUser || !token) {
+    if (!user || !token) {
       navigate("/login");
       return;
     }
-    setUser(JSON.parse(storedUser));
 
-    // Fetch all modules, shops, vendors, products
-    const fetchData = async () => {
+    async function fetchModules() {
       try {
-        const [modulesRes, shopsRes, vendorsRes, productsRes] = await Promise.all([
-          fetch("https://super-backend-bzin.onrender.com/api/modules"),
-          fetch("https://super-backend-bzin.onrender.com/api/shops"),
-          fetch("https://super-backend-bzin.onrender.com/api/vendors"),
-          fetch("https://super-backend-bzin.onrender.com/api/products"),
-        ]);
-
-        const [modulesData, shopsData, vendorsData, productsData] = await Promise.all([
-          modulesRes.json(),
-          shopsRes.json(),
-          vendorsRes.json(),
-          productsRes.json(),
-        ]);
-
-        setModules(modulesData);
-        setShops(shopsData);
-        setVendors(vendorsData);
-        setProducts(productsData);
+        const config = { headers: { Authorization: `Bearer ${token}` } };
+        const res = await axios.get(`${backendUrl}/api/modules`, config);
+        setModules(res.data);
       } catch (err) {
-        console.error("Error fetching data:", err);
+        console.error("Error fetching modules:", err);
       }
-    };
+    }
 
-    fetchData();
-  }, [navigate, token]);
+    fetchModules();
+  }, [user, token, navigate]);
 
-  if (!user) return <p>Loading...</p>;
+  if (!user) return null;
 
   return (
     <div style={{ padding: "20px" }}>
       <h1>Welcome, {user.name}!</h1>
-
-      <h2>Modules:</h2>
+      <h2>Your Modules:</h2>
       <ul>
-        {modules.map((mod) => (
+        {modules.map(mod => (
           <li key={mod._id}>
             <Link to={`/modules/${mod._id}/vendors`}>{mod.name}</Link>
           </li>
         ))}
       </ul>
-
-      <h2>Shops:</h2>
-      <ul>
-        {shops.map((shop) => (
-          <li key={shop._id}>{shop.name}</li>
-        ))}
-      </ul>
-
-      <h2>Vendors:</h2>
-      <ul>
-        {vendors.map((vendor) => (
-          <li key={vendor._id}>{vendor.name}</li>
-        ))}
-      </ul>
-
-      <h2>Products:</h2>
-      <ul>
-        {products.map((product) => (
-          <li key={product._id}>
-            {product.name} - ${product.price} (Vendor: {product.vendorId?.name || "N/A"})
-          </li>
-        ))}
-      </ul>
-
       <button
         onClick={() => {
           localStorage.removeItem("token");
@@ -99,6 +54,4 @@ const Dashboard = () => {
       </button>
     </div>
   );
-};
-
-export default Dashboard;
+}
