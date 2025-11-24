@@ -3,9 +3,9 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
 import Dashboard from "./pages/Dashboard";
-import Vendors from "./pages/Vendors";
-import Products from "./pages/Products";
-import ProtectedRoute from "./components/ProtectedRoute"; // new component
+import VendorsPage from "./pages/VendorsPage";
+import ProductsPage from "./pages/ProductsPage";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 export default function App() {
   return (
@@ -14,30 +14,9 @@ export default function App() {
         <Route path="/" element={<LoginPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/vendors"
-          element={
-            <ProtectedRoute>
-              <Vendors />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/products"
-          element={
-            <ProtectedRoute>
-              <Products />
-            </ProtectedRoute>
-          }
-        />
+        <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+        <Route path="/modules/:moduleId/vendors" element={<ProtectedRoute><VendorsPage /></ProtectedRoute>} />
+        <Route path="/vendors/:vendorId/products" element={<ProtectedRoute><ProductsPage /></ProtectedRoute>} />
       </Routes>
     </BrowserRouter>
   );
