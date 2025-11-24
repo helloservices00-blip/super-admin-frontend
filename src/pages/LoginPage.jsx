@@ -15,17 +15,24 @@ const LoginPage = () => {
     setLoading(true);
 
     try {
-      const res = await fetch("https://super-backend-bzin.onrender.com/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-      const data = await res.json();
+      const res = await fetch(
+        "https://super-backend-bzin.onrender.com/api/auth/login",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password }),
+        }
+      );
+
+      let data;
+      try {
+        data = await res.json();
+      } catch {
+        throw new Error("Invalid server response");
+      }
 
       if (!res.ok) {
-        setError(data.message || "Login failed");
-        setLoading(false);
-        return;
+        throw new Error(data.message || "Login failed");
       }
 
       localStorage.setItem("token", data.token);
@@ -33,8 +40,8 @@ const LoginPage = () => {
 
       navigate("/dashboard");
     } catch (err) {
-      console.error(err);
-      setError("Something went wrong. Try again.");
+      console.error("Login error:", err);
+      setError(err.message);
     } finally {
       setLoading(false);
     }
@@ -45,12 +52,30 @@ const LoginPage = () => {
       <div style={styles.card}>
         <h2>Login</h2>
         <form onSubmit={handleSubmit} style={styles.form}>
-          <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required style={styles.input}/>
-          <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required style={styles.input}/>
-          <button type="submit" style={styles.button} disabled={loading}>{loading ? "Logging in..." : "Login"}</button>
+          <input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            style={styles.input}
+          />
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            style={styles.input}
+          />
+          <button type="submit" style={styles.button} disabled={loading}>
+            {loading ? "Logging in..." : "Login"}
+          </button>
         </form>
         {error && <p style={styles.error}>{error}</p>}
-        <p>Don’t have an account? <Link to="/signup">Sign Up</Link></p>
+        <p>
+          Don’t have an account? <Link to="/signup">Sign Up</Link>
+        </p>
       </div>
     </div>
   );
