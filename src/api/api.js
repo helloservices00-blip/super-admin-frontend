@@ -11,8 +11,11 @@ export const loginUser = (data) => API.post("/auth/login", data);
 export const registerUser = (data) => API.post("/auth/register", data);
 
 // --- Products ---
-export const getProducts = () => API.get("/products"); // all products
-export const getProduct = (id) => API.get(`/products/${id}`); // single product by id
+export const getProducts = () => API.get("/products");
+export const getProduct = (id) => API.get(`/products/${id}`);
+
+// --- Orders ---
+export const createOrder = (orderData) => API.post("/orders", orderData); // ✅ new
 
 // --- JWT helper ---
 export const setAuthToken = (token) => {
