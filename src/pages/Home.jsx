@@ -1,9 +1,9 @@
 import React, { useEffect, useState, useContext } from "react";
 import { AuthContext } from "../context/AuthContext.jsx";
-import axios from "axios";
 
 export default function Home() {
   const { user, token } = useContext(AuthContext);
+  const [loading, setLoading] = useState(true);
   const [modules, setModules] = useState([]);
   const [shops, setShops] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -11,54 +11,69 @@ export default function Home() {
   const [products, setProducts] = useState([]);
 
   useEffect(() => {
-    if (!user || !token) return;
+    if (!user || !token) {
+      setLoading(false);
+      return;
+    }
 
     const fetchData = async () => {
       try {
-        const config = { headers: { Authorization: `Bearer ${token}` } };
-
-        const [modulesRes, shopsRes, categoriesRes, subcategoriesRes, productsRes] = await Promise.all([
-          axios.get("https://super-backend-bzin.onrender.com/api/modules", config),
-          axios.get("https://super-backend-bzin.onrender.com/api/shops", config),
-          axios.get("https://super-backend-bzin.onrender.com/api/categories", config),
-          axios.get("https://super-backend-bzin.onrender.com/api/subcategories", config),
-          axios.get("https://super-backend-bzin.onrender.com/api/products", config),
+        const headers = { Authorization: `Bearer ${token}` };
+        const [modRes, shopRes, catRes, subRes, prodRes] = await Promise.all([
+          fetch("https://super-backend-bzin.onrender.com/api/modules", { headers }).then(r => r.json()),
+          fetch("https://super-backend-bzin.onrender.com/api/shops", { headers }).then(r => r.json()),
+          fetch("https://super-backend-bzin.onrender.com/api/categories", { headers }).then(r => r.json()),
+          fetch("https://super-backend-bzin.onrender.com/api/subcategories", { headers }).then(r => r.json()),
+          fetch("https://super-backend-bzin.onrender.com/api/products", { headers }).then(r => r.json()),
         ]);
 
-        setModules(modulesRes.data);
-        setShops(shopsRes.data);
-        setCategories(categoriesRes.data);
-        setSubcategories(subcategoriesRes.data);
-        setProducts(productsRes.data);
+        setModules(modRes);
+        setShops(shopRes);
+        setCategories(catRes);
+        setSubcategories(subRes);
+        setProducts(prodRes);
       } catch (err) {
         console.error(err);
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchData();
   }, [user, token]);
 
-  if (!user || !token) return <p>Please login to see products and modules.</p>;
+  if (!user) return <p>Please login to see products and modules.</p>;
+  if (loading) return <p>Loading...</p>;
 
   return (
     <div style={{ padding: "20px" }}>
-      <h1>Welcome, {user.name}!</h1>
-
-      <h2>Modules</h2>
-      <ul>
-        {modules.map((mod) => (
-          <li key={mod._id}>{mod.name}</li>
-        ))}
-      </ul>
-
-      <h2>Products</h2>
-      <ul>
-        {products.map((prod) => (
-          <li key={prod._id}>
-            {prod.name} - ${prod.price} ({prod.vendorId?.name || "No vendor"})
-          </li>
-        ))}
-      </ul>
+      {modules.map((mod) => (
+        <div key={mod._id} style={{ marginBottom: "20px" }}>
+          <h2>{mod.name}</h2>
+          {shops.filter(s => s.moduleId === mod._id).map(shop => (
+            <div key={shop._id} style={{ marginLeft: "20px" }}>
+              <h3>{shop.name}</h3>
+              {categories.filter(c => c.shopId === shop._id).map(cat => (
+                <div key={cat._id} style={{ marginLeft: "20px" }}>
+                  <h4>{cat.name}</h4>
+                  {subcategories.filter(sc => sc.categoryId === cat._id).map(sub => (
+                    <div key={sub._id} style={{ marginLeft: "20px" }}>
+                      <h5>{sub.name}</h5>
+                      <ul>
+                        {products
+                          .filter(p => p.subcategoryId === sub._id)
+                          .map(p => (
+                            <li key={p._id}>{p.name} - ${p.price}</li>
+                          ))}
+                      </ul>
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+      ))}
     </div>
   );
 }
