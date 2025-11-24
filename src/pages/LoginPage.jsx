@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
@@ -43,15 +43,30 @@ const LoginPage = () => {
       <div style={styles.card}>
         <h2>Login</h2>
         <form onSubmit={handleSubmit} style={styles.form}>
-          <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required style={styles.input} />
-          <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required style={styles.input} />
+          <input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            style={styles.input}
+          />
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            style={styles.input}
+          />
           <button type="submit" style={styles.button} disabled={loading}>
             {loading ? "Logging in..." : "Login"}
           </button>
         </form>
         {error && <p style={styles.error}>{error}</p>}
+
         <p>
-          Don’t have an account? <a href="/signup">Sign Up</a>
+          Don’t have an account? <Link to="/signup">Sign Up</Link>
         </p>
       </div>
     </div>
@@ -64,7 +79,7 @@ const styles = {
   form: { display: "flex", flexDirection: "column", gap: "12px" },
   input: { padding: "12px", fontSize: "16px", borderRadius: "5px", border: "1px solid #ccc" },
   button: { padding: "12px", fontSize: "16px", background: "#007bff", color: "#fff", border: "none", borderRadius: "5px", cursor: "pointer" },
-  error: { color: "red", marginTop: "10px" }
+  error: { color: "red", marginTop: "10px" },
 };
 
 export default LoginPage;
