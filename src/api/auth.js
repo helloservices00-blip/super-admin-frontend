@@ -4,7 +4,7 @@ export const registerUser = async ({ name, email, password }) => {
   try {
     const res = await axios({
       method: "POST",
-      url: "https://multi-vendor-app-ey66.onrender.com/api/auth/register",
+      url: "https://super-backend-bzin.onrender.com/api/auth/register",
       headers: {
         "Content-Type": "application/json",
       },
@@ -26,7 +26,7 @@ export const loginUser = async ({ email, password }) => {
   try {
     const res = await axios({
       method: "POST",
-      url: "https://multi-vendor-app-ey66.onrender.com/api/auth/login",
+      url: "https://super-backend-bzin.onrender.com/api/auth/login",
       headers: {
         "Content-Type": "application/json",
       },
