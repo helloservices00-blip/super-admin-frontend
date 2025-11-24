@@ -1,72 +1,64 @@
-// src/pages/Home.jsx
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
+import { AuthContext } from "../context/AuthContext.jsx";
 import axios from "axios";
 
 export default function Home() {
+  const { user, token } = useContext(AuthContext);
   const [modules, setModules] = useState([]);
-  const [shops, setShops] = useState({});
-  const [categories, setCategories] = useState({});
-  const [products, setProducts] = useState({});
+  const [shops, setShops] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [subcategories, setSubcategories] = useState([]);
+  const [products, setProducts] = useState([]);
 
   useEffect(() => {
-    const fetchModules = async () => {
-      const resModules = await axios.get("https://super-backend-bzin.onrender.com/api/modules");
-      setModules(resModules.data);
+    if (!user || !token) return;
 
-      // Fetch shops for each module
-      const shopsData = {};
-      for (let mod of resModules.data) {
-        const resShops = await axios.get(`https://super-backend-bzin.onrender.com/api/shops/module/${mod._id}`);
-        shopsData[mod._id] = resShops.data;
-      }
-      setShops(shopsData);
+    const fetchData = async () => {
+      try {
+        const config = { headers: { Authorization: `Bearer ${token}` } };
 
-      // Fetch categories for each shop
-      const categoriesData = {};
-      for (let moduleId in shopsData) {
-        for (let shop of shopsData[moduleId]) {
-          const resCats = await axios.get(`https://super-backend-bzin.onrender.com/api/categories/shop/${shop._id}`);
-          categoriesData[shop._id] = resCats.data;
-        }
-      }
-      setCategories(categoriesData);
+        const [modulesRes, shopsRes, categoriesRes, subcategoriesRes, productsRes] = await Promise.all([
+          axios.get("https://super-backend-bzin.onrender.com/api/modules", config),
+          axios.get("https://super-backend-bzin.onrender.com/api/shops", config),
+          axios.get("https://super-backend-bzin.onrender.com/api/categories", config),
+          axios.get("https://super-backend-bzin.onrender.com/api/subcategories", config),
+          axios.get("https://super-backend-bzin.onrender.com/api/products", config),
+        ]);
 
-      // Fetch products for each category
-      const productsData = {};
-      for (let shopId in categoriesData) {
-        for (let cat of categoriesData[shopId]) {
-          const resProds = await axios.get(`https://super-backend-bzin.onrender.com/api/products/category/${cat._id}`);
-          productsData[cat._id] = resProds.data;
-        }
+        setModules(modulesRes.data);
+        setShops(shopsRes.data);
+        setCategories(categoriesRes.data);
+        setSubcategories(subcategoriesRes.data);
+        setProducts(productsRes.data);
+      } catch (err) {
+        console.error(err);
       }
-      setProducts(productsData);
     };
 
-    fetchModules();
-  }, []);
+    fetchData();
+  }, [user, token]);
+
+  if (!user || !token) return <p>Please login to see products and modules.</p>;
 
   return (
-    <div>
-      {modules.map(mod => (
-        <div key={mod._id}>
-          <h2>{mod.name}</h2>
-          {shops[mod._id]?.map(shop => (
-            <div key={shop._id} style={{ marginLeft: "20px" }}>
-              <h3>{shop.name}</h3>
-              {categories[shop._id]?.map(cat => (
-                <div key={cat._id} style={{ marginLeft: "40px" }}>
-                  <h4>{cat.name}</h4>
-                  {products[cat._id]?.map(prod => (
-                    <div key={prod._id} style={{ marginLeft: "60px" }}>
-                      <p>{prod.name} - ${prod.price}</p>
-                    </div>
-                  ))}
-                </div>
-              ))}
-            </div>
-          ))}
-        </div>
-      ))}
+    <div style={{ padding: "20px" }}>
+      <h1>Welcome, {user.name}!</h1>
+
+      <h2>Modules</h2>
+      <ul>
+        {modules.map((mod) => (
+          <li key={mod._id}>{mod.name}</li>
+        ))}
+      </ul>
+
+      <h2>Products</h2>
+      <ul>
+        {products.map((prod) => (
+          <li key={prod._id}>
+            {prod.name} - ${prod.price} ({prod.vendorId?.name || "No vendor"})
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
