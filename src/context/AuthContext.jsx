@@ -1,4 +1,3 @@
-// src/context/AuthContext.jsx
 import { createContext, useState, useEffect } from "react";
 import { setAuthToken } from "../api/api.js";
 
@@ -15,7 +14,7 @@ export function AuthProvider({ children }) {
 
     if (savedToken) {
       setToken(savedToken);
-      setAuthToken(savedToken); // set Axios default header
+      setAuthToken(savedToken); // ✅ ensures all axios requests use token
     }
 
     if (savedUser) {
