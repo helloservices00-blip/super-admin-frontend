@@ -15,23 +15,25 @@ const LoginPage = () => {
     setLoading(true);
 
     try {
-      const response = await fetch("https://your-backend.com/api/auth/login", {
+      const res = await fetch("https://super-backend-bzin.onrender.com/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
+      const data = await res.json();
 
-      const data = await response.json();
-
-      if (!response.ok) {
+      if (!res.ok) {
         setError(data.message || "Login failed");
         setLoading(false);
         return;
       }
 
-      localStorage.setItem("token", data.token); // save JWT
-      navigate("/dashboard"); // redirect
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
+
+      navigate("/dashboard");
     } catch (err) {
+      console.error(err);
       setError("Something went wrong. Try again.");
     } finally {
       setLoading(false);
@@ -43,31 +45,12 @@ const LoginPage = () => {
       <div style={styles.card}>
         <h2>Login</h2>
         <form onSubmit={handleSubmit} style={styles.form}>
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            style={styles.input}
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            style={styles.input}
-          />
-          <button type="submit" style={styles.button} disabled={loading}>
-            {loading ? "Logging in..." : "Login"}
-          </button>
+          <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required style={styles.input}/>
+          <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required style={styles.input}/>
+          <button type="submit" style={styles.button} disabled={loading}>{loading ? "Logging in..." : "Login"}</button>
         </form>
         {error && <p style={styles.error}>{error}</p>}
-
-        <p>
-          Don’t have an account? <Link to="/signup">Sign Up</Link>
-        </p>
+        <p>Don’t have an account? <Link to="/signup">Sign Up</Link></p>
       </div>
     </div>
   );
