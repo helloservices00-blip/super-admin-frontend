@@ -1,5 +1,5 @@
 import React, { useState, useContext } from "react";
-import { loginUser, registerUser, setAuthToken } from "../api/api.js";
+import { loginUser, registerUser } from "../api/api.js";
 import { AuthContext } from "../context/AuthContext.jsx";
 import { useNavigate } from "react-router-dom";
 
@@ -8,6 +8,7 @@ export default function LoginRegister() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
   const { setUser, setToken } = useContext(AuthContext);
   const navigate = useNavigate();
 
@@ -18,23 +19,13 @@ export default function LoginRegister() {
       if (isLogin) {
         const res = await loginUser({ email, password });
 
-        // Handle backend response
-        const userData = res.data.user;
-        const tokenData = res.data.token;
+        setUser(res.data.user);
+        setToken(res.data.token);
 
-        if (!userData || !tokenData) {
-          throw new Error("Invalid backend response");
-        }
+        localStorage.setItem("token", res.data.token);
+        localStorage.setItem("user", JSON.stringify(res.data.user));
 
-        // Set user and token in context
-        setUser(userData);
-        setToken(tokenData);
-        localStorage.setItem("token", tokenData);
-
-        // Set token for future API requests
-        setAuthToken(tokenData);
-
-        navigate("/"); // redirect after login
+        navigate("/"); // redirect to homepage
       } else {
         const res = await registerUser({
           name,
@@ -43,28 +34,12 @@ export default function LoginRegister() {
           role: "customer",
         });
 
-        alert(res.data.message || "Registered successfully! Now login.");
-
-        // Clear form and switch to login
-        setName("");
-        setEmail("");
-        setPassword("");
+        alert("Registered successfully! Now login.");
         setIsLogin(true);
       }
     } catch (err) {
       console.error("Auth error:", err);
-
-      if (err.response) {
-        console.error("Status:", err.response.status);
-        console.error("Data:", err.response.data);
-        alert(err.response.data?.message || "Auth failed (see console)");
-      } else if (err.request) {
-        console.error("No response received:", err.request);
-        alert("No response from server. Check backend or network.");
-      } else {
-        console.error("Other error:", err.message);
-        alert("Auth failed: " + err.message);
-      }
+      alert(err.response?.data?.message || "Auth failed");
     }
   };
 
@@ -100,7 +75,7 @@ export default function LoginRegister() {
           placeholder="Password"
         />
 
-        <button type="submit" className="w-full bg-blue-600 text-white p-2 rounded">
+        <button className="w-full bg-blue-600 text-white p-2 rounded">
           {isLogin ? "Login" : "Register"}
         </button>
       </form>
