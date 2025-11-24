@@ -18,25 +18,51 @@ export default function LoginRegister() {
       if (isLogin) {
         const res = await loginUser({ email, password });
 
-        setUser(res.data.user);
-        setToken(res.data.token);
+        // ✅ Adjust if backend wraps data in "data"
+        const userData = res.data.user || res.data.data?.user;
+        const tokenData = res.data.token || res.data.data?.token;
 
-        localStorage.setItem("token", res.data.token);
+        if (!userData || !tokenData) {
+          throw new Error("Invalid backend response");
+        }
 
-        navigate("/");
+        setUser(userData);
+        setToken(tokenData);
+        localStorage.setItem("token", tokenData);
+
+        navigate("/"); // redirect after login
       } else {
         const res = await registerUser({
           name,
           email,
           password,
-          role: "customer"   // ⭐ REQUIRED FOR BACKEND
+          role: "customer", // required by backend
         });
 
+        console.log("Register response:", res.data);
+
         alert("Registered successfully! Now login.");
+
+        // Clear form and switch to login
+        setName("");
+        setEmail("");
+        setPassword("");
         setIsLogin(true);
       }
     } catch (err) {
-      alert(err.response?.data?.message || "Auth failed");
+      console.error("Auth error:", err);
+
+      if (err.response) {
+        console.error("Status:", err.response.status);
+        console.error("Data:", err.response.data);
+        alert(err.response.data?.message || "Auth failed (see console)");
+      } else if (err.request) {
+        console.error("No response received:", err.request);
+        alert("No response from server. Check backend or network.");
+      } else {
+        console.error("Other error:", err.message);
+        alert("Auth failed: " + err.message);
+      }
     }
   };
 
@@ -72,7 +98,7 @@ export default function LoginRegister() {
           placeholder="Password"
         />
 
-        <button className="w-full bg-blue-600 text-white p-2 rounded">
+        <button type="submit" className="w-full bg-blue-600 text-white p-2 rounded">
           {isLogin ? "Login" : "Register"}
         </button>
       </form>
