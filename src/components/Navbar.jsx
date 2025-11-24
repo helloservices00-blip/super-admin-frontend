@@ -10,7 +10,9 @@ export default function Navbar() {
     setUser(null);
     setToken(null);
     localStorage.removeItem("cart");
-    navigate("/");
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    navigate("/login");
   };
 
   const cart = JSON.parse(localStorage.getItem("cart") || "[]");
@@ -23,7 +25,9 @@ export default function Navbar() {
         <div className="flex items-center space-x-4">
           <Link to="/cart" className="relative">
             Cart
-            <span className="ml-1 bg-blue-600 text-white text-xs px-2 py-0.5 rounded-full">{cartCount}</span>
+            {cartCount > 0 && (
+              <span className="ml-1 bg-blue-600 text-white text-xs px-2 py-0.5 rounded-full">{cartCount}</span>
+            )}
           </Link>
           {user ? (
             <>
