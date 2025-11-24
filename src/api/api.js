@@ -6,11 +6,14 @@ const API = axios.create({
   headers: { "Content-Type": "application/json" },
 });
 
-// Login/Register endpoints
+// Auth endpoints
 export const loginUser = (data) => API.post("/auth/login", data);
 export const registerUser = (data) => API.post("/auth/register", data);
 
-// Export setAuthToken properly
+// Product endpoints
+export const getProducts = () => API.get("/products"); // ✅ Add this
+
+// JWT helper
 export const setAuthToken = (token) => {
   if (token) {
     API.defaults.headers.common["Authorization"] = `Bearer ${token}`;
