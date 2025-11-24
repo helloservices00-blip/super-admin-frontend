@@ -1,6 +1,6 @@
 // src/context/AuthContext.jsx
 import { createContext, useState, useEffect } from "react";
-import { setAuthToken } from "../api/api.js";
+import { setAuthToken } from "../api/api.js"; // now works
 
 export const AuthContext = createContext();
 
