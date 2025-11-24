@@ -1,5 +1,5 @@
 import React, { useState, useContext } from "react";
-import { loginUser, registerUser } from "../api/api.js";
+import { loginUser, registerUser, setAuthToken } from "../api/api.js";
 import { AuthContext } from "../context/AuthContext.jsx";
 import { useNavigate } from "react-router-dom";
 
@@ -18,17 +18,21 @@ export default function LoginRegister() {
       if (isLogin) {
         const res = await loginUser({ email, password });
 
-        // ✅ Adjust if backend wraps data in "data"
-        const userData = res.data.user || res.data.data?.user;
-        const tokenData = res.data.token || res.data.data?.token;
+        // Handle backend response
+        const userData = res.data.user;
+        const tokenData = res.data.token;
 
         if (!userData || !tokenData) {
           throw new Error("Invalid backend response");
         }
 
+        // Set user and token in context
         setUser(userData);
         setToken(tokenData);
         localStorage.setItem("token", tokenData);
+
+        // Set token for future API requests
+        setAuthToken(tokenData);
 
         navigate("/"); // redirect after login
       } else {
@@ -36,12 +40,10 @@ export default function LoginRegister() {
           name,
           email,
           password,
-          role: "customer", // required by backend
+          role: "customer",
         });
 
-        console.log("Register response:", res.data);
-
-        alert("Registered successfully! Now login.");
+        alert(res.data.message || "Registered successfully! Now login.");
 
         // Clear form and switch to login
         setName("");
