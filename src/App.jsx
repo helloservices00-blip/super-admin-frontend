@@ -1,23 +1,27 @@
-import React from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import LoginPage from "./pages/LoginPage";
-import SignupPage from "./pages/SignupPage";
-import Dashboard from "./pages/Dashboard";
-import VendorsPage from "./pages/VendorsPage";
-import ProductsPage from "./pages/ProductsPage";
-import ProtectedRoute from "./components/ProtectedRoute";
+import Navbar from "./components/Navbar.jsx";
+import Home from "./pages/Home.jsx";
+import LoginRegister from "./pages/LoginRegister.jsx";
+import ProductDetails from "./pages/ProductDetails.jsx";
+import CartPage from "./pages/CartPage.jsx";
+import Checkout from "./pages/Checkout.jsx";
+import Orders from "./pages/Orders.jsx";
+import { AuthProvider } from "./context/AuthContext.jsx";
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<LoginPage />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/signup" element={<SignupPage />} />
-        <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-        <Route path="/modules/:moduleId/vendors" element={<ProtectedRoute><VendorsPage /></ProtectedRoute>} />
-        <Route path="/vendors/:vendorId/products" element={<ProtectedRoute><ProductsPage /></ProtectedRoute>} />
-      </Routes>
-    </BrowserRouter>
+    <AuthProvider>
+      <BrowserRouter>
+        <Navbar />
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<LoginRegister />} />
+          <Route path="/product/:id" element={<ProductDetails />} />
+          <Route path="/cart" element={<CartPage />} />
+          <Route path="/checkout" element={<Checkout />} />
+          <Route path="/orders" element={<Orders />} />
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
   );
 }
